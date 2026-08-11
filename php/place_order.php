@@ -27,9 +27,17 @@ if (!is_array($cart) || count($cart) === 0) {
   die("Cart invalid or empty!");
 }
 
-/* 1) Insert into orders */
-$stmt = mysqli_prepare($conn, "INSERT INTO orders (customer, pickup_time, total, status) VALUES (?, ?, ?, 'Pending')");
-mysqli_stmt_bind_param($stmt, "ssi", $customer, $pickup_time, $total);
+/* 1) Find active open shift register */
+$register_id = null;
+$register_res = mysqli_query($conn, "SELECT id FROM daily_registers WHERE status = 'Open' LIMIT 1");
+if ($register_res && mysqli_num_rows($register_res) > 0) {
+    $reg = mysqli_fetch_assoc($register_res);
+    $register_id = (int)$reg['id'];
+}
+
+/* 2) Insert into orders */
+$stmt = mysqli_prepare($conn, "INSERT INTO orders (customer, pickup_time, total, status, register_id) VALUES (?, ?, ?, 'Pending', ?)");
+mysqli_stmt_bind_param($stmt, "ssii", $customer, $pickup_time, $total, $register_id);
 mysqli_stmt_execute($stmt);
 
 $order_id = mysqli_insert_id($conn);
@@ -57,14 +65,14 @@ foreach ($cart as $item) {
   <div class="container">
 
     <div class="navbar">
-      <a href="../menu.php">Menu</a> |
-      <a href="../cart.html">Cart</a> |
-      <a href="../checkout.php">Checkout</a> |
-      <a href="../track_order.php">Track Order</a> |
-      <a href="../order_history.php">Order History</a> |
-      <a href="../analysis.php">Sales Analysis</a> |
-      <a href="../admin_orders.php">Admin Orders</a> |
-      <a href="../admin_products.php">Admin Products</a>
+      <div class="nav-left">
+        <a href="../about.php" style="font-weight: bold; color: var(--primary); border-right: 2px solid var(--border-color); padding-right: 15px; margin-right: 10px;">About</a>
+        <a href="../menu.php">Menu</a> |
+        <a href="../cart.php">Cart</a> |
+        <a href="../checkout.php" class="active">Checkout</a> |
+        <a href="../track_order.php">Track Order</a> |
+        <a href="../order_history.php">Order History</a>
+      </div>
     </div>
 
     <h2>Order Placed Successfully!</h2>
@@ -88,6 +96,14 @@ foreach ($cart as $item) {
 
   <script>
     localStorage.removeItem('cart');
+    
+    // Save order ID to local storage for automatic tracking in order history
+    const orderId = <?php echo (int)$order_id; ?>;
+    let orderIds = JSON.parse(localStorage.getItem("canteen_order_ids")) || [];
+    if (!orderIds.includes(orderId)) {
+        orderIds.unshift(orderId); // Put newest first
+    }
+    localStorage.setItem("canteen_order_ids", JSON.stringify(orderIds));
   </script>
   <footer style="text-align: center; padding: 20px; background-color: #f1f1f1; margin-top: 50px; border-top: 1px solid #ddd;">
     <p style="margin: 0; font-family: sans-serif; color: #333;">

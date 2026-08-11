@@ -17,6 +17,14 @@ if ($order_id > 0) {
   mysqli_query($conn, "UPDATE orders SET status='$status' WHERE order_id=$order_id");
 }
 
-header("Location: ../admin_orders.php");
+if (isset($_POST['ajax'])) {
+  header('Content-Type: application/json');
+  echo json_encode(['success' => true]);
+  exit;
+}
+
+// Redirect back to dashboard or standard orders screen depending on caller
+$redirect = isset($_POST['redirect_dashboard']) ? "../admin_dashboard.php" : "../admin_orders.php";
+header("Location: $redirect");
 exit;
 ?>

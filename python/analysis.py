@@ -61,7 +61,11 @@ result["top_combos"] = [
 ]
 
 # 6) Save JSON in same folder
-with open("analysis.json", "w") as f:
+import os
+script_dir = os.path.dirname(os.path.abspath(__file__))
+json_path = os.path.join(script_dir, "analysis.json")
+
+with open(json_path, "w") as f:
     json.dump(result, f, indent=4)
 
 print("analysis.json generated successfully!")

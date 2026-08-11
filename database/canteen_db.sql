@@ -29,11 +29,35 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `orders` (
   `order_id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `register_id` int(11) DEFAULT NULL,
   `customer` varchar(100) NOT NULL,
   `pickup_time` varchar(50) NOT NULL,
   `total` int(11) NOT NULL,
   `status` varchar(20) NOT NULL DEFAULT 'Pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL,
+  `username` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` varchar(20) NOT NULL DEFAULT 'customer',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `username`, `password`, `role`) VALUES
+(1, 'admin', '$2y$10$dbF7WsIYaMUNb9BKjPFC2ukBrmKUAoXgok/qxJp6E1vGaMeNUys8W', 'admin'),
+(2, 'student', '$2y$10$rbzbyGlGcNlBAa10Y2.M6uKo/sE86uamXUSRWEgzeCeUHTElGwsly', 'customer');
 
 --
 -- Dumping data for table `orders`
@@ -193,23 +217,24 @@ CREATE TABLE `products` (
   `id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
   `price` int(11) NOT NULL,
-  `image` varchar(225) NOT NULL
+  `image` varchar(225) NOT NULL,
+  `category` varchar(50) NOT NULL DEFAULT 'Fast Food'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `products`
 --
 
-INSERT INTO `products` (`id`, `name`, `price`, `image`) VALUES
-(1, 'Burger', 250, ''),
-(2, 'Pizza', 800, ''),
-(3, 'Fries', 170, ''),
-(4, 'Drink', 100, ''),
-(6, 'Biryani', 250, ''),
-(7, 'Sandwich', 80, ''),
-(8, 'Shawarma', 200, ''),
-(9, 'Chicken Paratha', 150, ''),
-(10, 'Samosa', 50, '');
+INSERT INTO `products` (`id`, `name`, `price`, `image`, `category`) VALUES
+(1, 'Burger', 250, '', 'Fast Food'),
+(2, 'Pizza', 800, '', 'Fast Food'),
+(3, 'Fries', 170, '', 'Fast Food'),
+(4, 'Drink', 100, '', 'Beverages'),
+(6, 'Biryani', 250, '', 'Meals'),
+(7, 'Sandwich', 80, '', 'Meals'),
+(8, 'Shawarma', 200, '', 'Fast Food'),
+(9, 'Chicken Paratha', 150, '', 'Snacks'),
+(10, 'Samosa', 50, '', 'Snacks');
 
 --
 -- Indexes for dumped tables
@@ -234,6 +259,13 @@ ALTER TABLE `products`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `username` (`username`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -254,6 +286,25 @@ ALTER TABLE `order_items`
 --
 ALTER TABLE `products`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- Table structure for table `daily_registers`
+--
+CREATE TABLE `daily_registers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `opened_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `closed_at` timestamp NULL DEFAULT NULL,
+  `status` varchar(20) NOT NULL DEFAULT 'Open',
+  `opened_by` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
